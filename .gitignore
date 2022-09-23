@@ -1,4 +1,4 @@
-
+notebooks/
 .venv/
 .ipynb*
 __*/
