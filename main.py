@@ -1,5 +1,5 @@
 from parser.course_tracker import CourseTracker
 
-course_tracker = CourseTracker("END", "12653", "LS")
+course_tracker = CourseTracker("KON", "12110", "LS")
 
-course_tracker.print_specific_row()
+course_tracker.get_row_with_crn()
