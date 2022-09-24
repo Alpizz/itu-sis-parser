@@ -14,6 +14,8 @@ class CourseTracker():
         self.last_server_update = self.get_last_updated_time()
         self.last_client_check = self.get_last_client_check_time()
         self.course_table = self.get_course_table()
+        self.column_size = 0
+        self.row_size = 0
     
     def check_course_code(self, course_code):
         if course_code in self.course_code_list:
@@ -37,10 +39,10 @@ class CourseTracker():
         table = self.soup.find_all('table')[0]
         rows = table.find_all('tr')
         header_row = rows[1]
-        column_headers, column_size = self.get_column_headers(header_row)
+        column_headers, self.column_size = self.get_column_headers(header_row)
         rows = rows[2:]
-        row_size = len(rows)
-        course_table = pd.DataFrame(columns=range(column_size), index=range(row_size))
+        self.row_size = len(rows)
+        course_table = pd.DataFrame(columns=range(self.column_size), index=range(self.row_size))
         course_table.columns = column_headers
         for i, row in enumerate(rows):
             columns = row.find_all('td')
@@ -51,10 +53,26 @@ class CourseTracker():
     def print_course_table(self):
         print(self.course_table)
 
+    def print_row_raw(self):
+        row = self.get_row_with_crn()
+        print(row)
+
+    def print_row_formatted(self):
+        row = self.get_row_with_crn()
+        course_code = row["Course Code"].values[0]
+        course_crn = row["CRN"].values[0]
+        course_name = row["Course Title"].values[0]
+        course_enrolled = row["Enrolled"].values[0]
+        course_capacity = row["Capacity"].values[0]
+
+        print("Course Name: {}".format(course_name))
+        print("Course Code: {}".format(course_code))
+        print("CRN: {}".format(course_crn))
+        print("Enrollment Status: {}/{}".format(course_enrolled, course_capacity))
+
     def get_row_with_crn(self):
         row = self.course_table.loc[self.course_table['CRN'] == self.course_crn]
         if not row.empty:
-            print(row)
             return row
         else:
             print("CRN not found.")
@@ -81,3 +99,17 @@ class CourseTracker():
         now = dt.now()
         formatted_now = now.strftime("%d-%m-%Y / %H:%M:%S")
         return formatted_now
+
+    def check_availability(self):
+        row = self.get_row_with_crn()
+        if not row.empty:
+            capacity = int(row["Capacity"].values[0])
+            enrolled = int(row["Enrolled"].values[0])
+            print("Capacity: ", capacity)
+            print("Enrolled: ", enrolled)
+            if capacity > enrolled:
+                print("Course is available.")
+                return True
+            else:
+                print("Course is not available.")
+                return False

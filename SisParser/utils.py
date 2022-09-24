@@ -37,7 +37,7 @@ class CourseTrackerUtils():
         url = config.BASE_COURSE_PROG_URL + f"?seviye={self.student_level}"
         response = requests.get(url)
         if response.status_code != 200:
-            return {"error":True, "message":"Connection to ITU SIS failed."}
+            return {"error": True, "message": "Connection to ITU SIS failed."}
         soup = BeautifulSoup(response.content, 'lxml')
         subject_options = soup.find('select', attrs = {'name': 'derskodu'} )
         course_code_list = []
